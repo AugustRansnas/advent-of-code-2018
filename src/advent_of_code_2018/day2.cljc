@@ -15,14 +15,12 @@
    }
   [puzzle]
   (->> puzzle
-       (map (fn [id]
-              (frequencies id)))
+       (map #(frequencies %))
        (map (fn [frequency]
               (->> frequency
                    (filter (fn [[_ value]]
                              (and (> value 1) (< value 4))))
-                   (map (fn [[_ value]]
-                          value))
+                   (vals)
                    (distinct))
               ))
        (flatten)
