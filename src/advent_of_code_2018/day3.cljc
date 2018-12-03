@@ -54,24 +54,30 @@
   [rect]
   (->> (for [x (range (left rect) (right rect))
              y (range (top rect) (bottom rect))]
-         [x y]))
+         [x y])
+       (into []))
   )
 
-(defn day3-a
-  {:test (fn []
-           (is= (day3-a ["#1 @ 1,3: 4x4" "#2 @ 3,1: 4x4" "#3 @ 5,5: 2x2"]) 4))}
+(defn overlap?
+  [claim1 claim2]
+  (let [rect1 (set (draw-rect claim1))
+        rect2 (set (draw-rect claim2))]
+    (boolean (seq (clojure.set/intersection rect1 rect2)))))
+
+(defn day3-b
   [puzzle-input]
-  (->> puzzle-input
-       (map-input)
-       (map draw-rect)
-       (reduce concat)
-       (frequencies)
-       (filter (fn [[_ val]]
-                 (> val 1)))
-       (count)))
+  {:test (fn []
+           (is= (new-attempt ["#1 @ 1,3: 4x4" "#2 @ 3,1: 4x4" "#3 @ 5,5: 2x2"]) "3"))}
+  (as-> puzzle-input $
+        (map-input $)
+        (filter (fn [claim1]
+                  (every? (fn [claim2]
+                            (or (= (:id claim1) (:id claim2))
+                                (not (overlap? claim1 claim2))))
+                          $))
+                $) $))
 
-(day3-a parsed-puzzle-input)
-
+(day3-b parsed-puzzle-input)
 
 
 
