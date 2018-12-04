@@ -67,7 +67,7 @@
 (defn day3-b
   [puzzle-input]
   {:test (fn []
-           (is= (new-attempt ["#1 @ 1,3: 4x4" "#2 @ 3,1: 4x4" "#3 @ 5,5: 2x2"]) "3"))}
+           (is= (day3-b ["#1 @ 1,3: 4x4" "#2 @ 3,1: 4x4" "#3 @ 5,5: 2x2"]) "3"))}
   (as-> puzzle-input $
         (map-input $)
         (filter (fn [claim1]
