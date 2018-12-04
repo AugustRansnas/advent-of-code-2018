@@ -14,8 +14,6 @@
 
 (parse-input test-input)
 
-;;(parse-input puzzle-input)
-
 (defn get-guard-id-from-line
   {:test (fn []
            (is= (get-guard-id-from-line "[1518-11-01 00:00] Guard #10 begins shift\n") "10"))}
@@ -77,21 +75,45 @@
        (last)
        (:id)))
 
+(defn get-most-frequent-sleep-minute
+  [event-list]
+  (->> event-list
+       (map (fn [event-pair]
+              (get-minutes-asleep (first event-pair) (last event-pair))))
+       (reduce concat)
+       (frequencies)
+       (sort-by second)
+       (last))
+  )
+
 (defn day4-a
   [logs]
   (let [guards-and-shifts (map-guards-and-shifts logs)
         guard-with-longest-sleep (get-guard-with-longest-sleep guards-and-shifts)
         event-list-for-guard-with-longest-sleep (partition 2 (:events (get guards-and-shifts guard-with-longest-sleep)))
-        most-frequent-minute-guard-sleeps (->> event-list-for-guard-with-longest-sleep
-                                               (map (fn [event-pair]
-                                                      (get-minutes-asleep (first event-pair) (last event-pair))))
-                                               (reduce concat)
-                                               (frequencies)
-                                               (sort-by second)
-                                               (last))]
+        most-frequent-minute-guard-sleeps (get-most-frequent-sleep-minute event-list-for-guard-with-longest-sleep)]
     (* guard-with-longest-sleep (first most-frequent-minute-guard-sleeps))))
 
-(day4-a (parse-input puzzle-input))
+;;(day4-a (parse-input puzzle-input))
+
+(defn day4-b
+  [logs]
+  (let [guards-and-shifts (map-guards-and-shifts logs)]
+    (as-> guards-and-shifts $
+         (reduce-kv (fn [result key val]
+                      (let [most-frequent-sleep-minute (get-most-frequent-sleep-minute (partition 2 (:events val)))
+                            minute (first most-frequent-sleep-minute)
+                            frequency-for-minute (last most-frequent-sleep-minute)]
+                        (if (and (not (nil? most-frequent-sleep-minute))
+                              (< (:frequency result) frequency-for-minute))
+                          {:guard-id key :minute minute :frequency frequency-for-minute}
+                          result))
+                      ) {:frequency 0} $)
+          (* (:guard-id $) (:minute $))))
+
+  )
+
+(day4-b (parse-input puzzle-input))
 
 
 
