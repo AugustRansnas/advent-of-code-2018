@@ -24,6 +24,8 @@
        (react)
        (count)))
 
+;;(day5-a puzzle-input)
+
 (defn char-range [start end]
   (map char (range (int start) (inc (int end)))))
 
@@ -50,4 +52,4 @@
                  {:count 10000})
          (:count))))
 
-(day5-b puzzle-input)
+;;(day5-b puzzle-input)

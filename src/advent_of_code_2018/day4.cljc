@@ -25,10 +25,9 @@
            (is (= (delta "[1518-11-01 00:05] falls asleep" "[1518-11-01 00:25] wakes up") 20))
            )}
   [t1 t2]
-  (do (println t1 t2)
-      (let [min1 (Integer/parseInt (last (re-find #"\d{2}:(.*)\]" t1)))
-            min2 (Integer/parseInt (last (re-find #"\d{2}:(.*)\]" t2)))]
-        (- min2 min1))))
+  (let [min1 (Integer/parseInt (last (re-find #"\d{2}:(.*)\]" t1)))
+        min2 (Integer/parseInt (last (re-find #"\d{2}:(.*)\]" t2)))]
+    (- min2 min1)))
 
 (defn get-minutes-asleep
   {:test (fn []
@@ -113,7 +112,7 @@
 
   )
 
-(day4-b (parse-input puzzle-input))
+;;(day4-b (parse-input puzzle-input))
 
 
 
