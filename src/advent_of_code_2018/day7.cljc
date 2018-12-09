@@ -41,3 +41,73 @@
 
 (day7-a test-input)
 (day7-a puzzle-input)
+
+
+(defn time-to-complete-letter
+  [letter]
+  (- (int letter) 64))
+
+(defn get-finished-letters
+  [working-on]
+  (set (filter (fn [letter]
+                 (= (:time-worked-on letter) (time-to-complete-letter (:letter letter)))
+                 ) working-on)))
+
+
+(defn get-new-work-and-queue
+  [schedule completed-work]
+  (let [interim-wl (->> (:working-on schedule)
+                     (remove (fn [letter]
+                               (contains? completed-work (:letter letter))
+                               ))
+                     (map (fn [letter]
+                            {:time-worked-on (+ (:time-worked-on letter) 1)
+                             :letter         (:letter letter)})))]
+    (if (< (count interim-wl) 5)
+      {:working-on (conj interim-wl (take (- 5 (count interim-wl)) (:queue schedule)))
+       :queue (take (- 5 (count interim-wl)) (:queue schedule))}
+      {:working-on interim-wl
+       :queue (:queue schedule)})))
+
+(defn update-schedule
+  [schedule]
+  (let [completed-work (get-finished-letters (:working-on schedule))
+        work-and-queue  (get-new-work-and-queue schedule completed-work)]
+    (prn "completed work:" completed-work)
+    (prn "work-and-queue:" work-and-queue)
+    {:elapsed-time (+ (:elapsed-time schedule) 1)
+     :working-on  (:working-on work-and-queue)
+     :queue  (:queue work-and-queue)
+     :done-work (concat (:done-work schedule) completed-work)
+     }))
+
+(defn letter-is-done?
+  [letter done-work]
+  (true? (filter (fn [done-letter]
+                   (= done-letter (str letter))
+                   ) done-work)))
+
+(defn day7-b
+  [input]
+  (let [dependency-map (->> input
+                            (parse-input)
+                            (make-dependency-graph))
+        sorted-dependencies (day7-a input)]
+    (loop [letter sorted-dependencies
+           schedule {:elapsed-time 0
+                     :working-on   #{{:time-worked-on 0 :letter  (first letter)}}
+                     :queue        #{}
+                     :done-work    []}]
+
+      (let [updated-schedule-with-queue (update schedule :queue (fn [old-value]
+                                                                 (clojure.set/union old-value (map (fn [dep]
+                                                                                                     {:time-worked-on 0
+                                                                                                      :letter  dep}) (dep/immediate-dependencies dependency-map (str (first letter)))) )))]
+
+        (if (letter-is-done? (first letter) (:done-work schedule))
+          (recur (next letter) (update-schedule updated-schedule-with-queue))
+          (recur (first letter) (update-schedule updated-schedule-with-queue)))))))
+
+(day7-b test-input)
+
+;;(day7-b puzzle-input)
